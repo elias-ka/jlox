@@ -1,8 +1,6 @@
 package com.github.elias_ka;
 
-import java.util.List;
-
-abstract class Expr {
+public abstract class Expr {
     interface Visitor<R> {
         R visitBinaryExpr(Binary expr);
 
@@ -71,7 +69,6 @@ abstract class Expr {
         final Token operator;
         final Expr right;
     }
-
 
     abstract <R> R accept(Visitor<R> visitor);
 }

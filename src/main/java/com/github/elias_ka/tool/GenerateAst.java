@@ -36,7 +36,7 @@ public class GenerateAst {
             writer.println();
             writer.println("import java.util.List;");
             writer.println();
-            writer.println("abstract class " + baseName + " {");
+            writer.println("public abstract class " + baseName + " {");
 
             defineVisitor(writer, baseName, types);
 
@@ -48,7 +48,6 @@ public class GenerateAst {
             }
 
             // The base accept() method.
-            writer.println();
             writer.println("    abstract <R> R accept(Visitor<R> visitor);");
 
             writer.println("}");

@@ -21,8 +21,7 @@ public class Scanner {
             Map.entry("this", TokenType.THIS),
             Map.entry("true", TokenType.TRUE),
             Map.entry("var", TokenType.VAR),
-            Map.entry("while", TokenType.WHILE)
-    );
+            Map.entry("while", TokenType.WHILE));
 
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
@@ -120,7 +119,8 @@ public class Scanner {
 
     private void string() {
         while (peek() != '"' && !isAtEnd()) {
-            if (peek() == '\n') line++;
+            if (peek() == '\n')
+                line++;
             advance();
         }
 
