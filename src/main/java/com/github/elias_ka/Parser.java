@@ -1,5 +1,6 @@
 package com.github.elias_ka;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Parser {
@@ -13,16 +14,73 @@ public class Parser {
         this.tokens = tokens;
     }
 
-    public Expr parse() {
+    public List<Stmt> parse() {
+        List<Stmt> statements = new ArrayList<>();
+        while (!isAtEnd()) {
+            statements.add(declaration());
+        }
+
+        return statements;
+    }
+
+    private Expr expression() {
+        return assignment();
+    }
+
+    private Stmt declaration() {
         try {
-            return expression();
+            if (match(TokenType.VAR))
+                return varDeclaration();
+            return statement();
         } catch (ParseError error) {
+            synchronize();
             return null;
         }
     }
 
-    private Expr expression() {
-        return equality();
+    private Stmt statement() {
+        if (match(TokenType.PRINT))
+            return printStatement();
+
+        return expressionStatement();
+    }
+
+    private Stmt printStatement() {
+        final Expr value = expression();
+        consume(TokenType.SEMICOLON, "Expect ';' after value.");
+        return new Stmt.Print(value);
+    }
+
+    private Stmt varDeclaration() {
+        final Token name = consume(TokenType.IDENTIFIER, "Expect variable name.");
+        final Expr initializer = match(TokenType.EQUAL) ? expression() : null;
+        consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.");
+        return new Stmt.Var(name, initializer);
+    }
+
+    private Stmt expressionStatement() {
+        final Expr expr = expression();
+        consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+        return new Stmt.Expression(expr);
+    }
+
+    private Expr assignment() {
+        final Expr expr = equality();
+
+        if (match(TokenType.EQUAL)) {
+            final Token equals = previous();
+            final Expr value = assignment();
+
+            if (expr instanceof Expr.Variable e) {
+                return new Expr.Assign(e.name, value);
+            }
+
+            // We report an error if the left-hand side isn’t a valid assignment target, but we don’t throw it
+            // because the parser isn’t in a confused state where we need to go into panic mode and synchronize.
+            error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
     }
 
     private Expr equality() {
@@ -90,6 +148,10 @@ public class Parser {
 
         if (match(TokenType.NUMBER, TokenType.STRING)) {
             return new Expr.Literal(previous().literal());
+        }
+
+        if (match(TokenType.IDENTIFIER)) {
+            return new Expr.Variable(previous());
         }
 
         if (match(TokenType.LEFT_PAREN)) {

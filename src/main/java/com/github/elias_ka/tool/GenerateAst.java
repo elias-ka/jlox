@@ -17,10 +17,18 @@ public class GenerateAst {
         String outputDir = args[0];
         try {
             defineAst(outputDir, "Expr", List.of(
+                    "Assign   : Token name, Expr value",
                     "Binary   : Expr left, Token operator, Expr right",
                     "Grouping : Expr expression",
                     "Literal  : Object value",
-                    "Unary    : Token operator, Expr right"
+                    "Unary    : Token operator, Expr right",
+                    "Variable : Token name"
+            ));
+
+            defineAst(outputDir, "Stmt", List.of(
+                    "Expression : Expr expression",
+                    "Print      : Expr expression",
+                    "Var        : Token name, Expr initializer"
             ));
         } catch (IOException e) {
             System.err.println("Error writing file: " + e.getMessage());
@@ -68,13 +76,20 @@ public class GenerateAst {
     }
 
     private static void defineType(PrintWriter writer, String baseName, String className, String fieldList) {
+        final String[] fields = fieldList.split(", ");
+
         writer.println("    public static class " + className + " extends " + baseName + " {");
 
+        // Fields.
+        for (String field : fields) {
+            writer.println("        public final " + field + ";");
+        }
+
         // Constructor.
+        writer.println();
         writer.println("        " + className + "(" + fieldList + ") {");
 
         // Store parameters in fields.
-        final String[] fields = fieldList.split(", ");
         for (final String field : fields) {
             String name = field.split(" ")[1];
             writer.println("            this." + name + " = " + name + ";");
@@ -88,13 +103,6 @@ public class GenerateAst {
         writer.println("        <R> R accept(Visitor<R> visitor) {");
         writer.println("            return visitor.visit" + className + baseName + "(this);");
         writer.println("        }");
-
-        // Fields.
-        writer.println();
-        for (String field : fields) {
-            writer.println("        final " + field + ";");
-        }
-
         writer.println("    }");
         writer.println();
     }
