@@ -1,4 +1,4 @@
-package com.github.elias_ka;
+package com.github.elias_ka.lox;
 
 public record Token(TokenType type, String lexeme, Object literal, int line) {
 

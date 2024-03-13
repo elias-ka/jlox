@@ -1,4 +1,4 @@
-package com.github.elias_ka;
+package com.github.elias_ka.lox;
 
 import java.io.BufferedReader;
 import java.io.IOException;

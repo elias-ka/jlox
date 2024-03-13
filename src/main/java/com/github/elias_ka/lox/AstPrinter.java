@@ -1,4 +1,4 @@
-package com.github.elias_ka;
+package com.github.elias_ka.lox;
 
 public class AstPrinter implements Expr.Visitor<String> {
     String print(Expr expr) {

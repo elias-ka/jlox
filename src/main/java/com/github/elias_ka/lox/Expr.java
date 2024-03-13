@@ -1,6 +1,4 @@
-package com.github.elias_ka;
-
-import java.util.List;
+package com.github.elias_ka.lox;
 
 public abstract class Expr {
     interface Visitor<R> {
