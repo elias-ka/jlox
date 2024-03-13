@@ -89,16 +89,16 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     public Object visitUnaryExpr(Expr.Unary expr) {
         final Object right = evaluate(expr.right);
 
-        switch (expr.operator.type()) {
-            case TokenType.BANG:
-                return !isTruthy(right);
-            case TokenType.MINUS:
+        return switch (expr.operator.type()) {
+            case TokenType.BANG -> !isTruthy(right);
+            case TokenType.MINUS -> {
                 checkNumberOperands(expr.operator, right);
-                return -(double) right;
-        }
+                yield -(double) right;
+            }
+            // Unreachable.
+            default -> null;
+        };
 
-        // Unreachable.
-        return null;
     }
 
     @Override
