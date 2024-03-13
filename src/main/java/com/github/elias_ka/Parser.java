@@ -88,7 +88,7 @@ public class Parser {
     }
 
     private Expr assignment() {
-        final Expr expr = equality();
+        final Expr expr = or();
 
         if (match(TokenType.EQUAL)) {
             final Token equals = previous();
@@ -101,6 +101,30 @@ public class Parser {
             // We report an error if the left-hand side isn’t a valid assignment target, but we don’t throw it
             // because the parser isn’t in a confused state where we need to go into panic mode and synchronize.
             error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
+    }
+
+    private Expr or() {
+        Expr expr = and();
+
+        while (match(TokenType.OR)) {
+            final Token operator = previous();
+            final Expr right = and();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expr and() {
+        Expr expr = equality();
+
+        while (match(TokenType.AND)) {
+            final Token operator = previous();
+            final Expr right = equality();
+            expr = new Expr.Logical(expr, operator, right);
         }
 
         return expr;
