@@ -41,26 +41,33 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         final Object right = evaluate(expr.right);
 
         switch (expr.operator.type()) {
-            case TokenType.GREATER:
+            case TokenType.GREATER -> {
                 checkNumberOperands(expr.operator, left, right);
                 return (double) left > (double) right;
-            case TokenType.GREATER_EQUAL:
+            }
+            case TokenType.GREATER_EQUAL -> {
                 checkNumberOperands(expr.operator, left, right);
                 return (double) left >= (double) right;
-            case TokenType.LESS:
+            }
+            case TokenType.LESS -> {
                 checkNumberOperands(expr.operator, left, right);
                 return (double) left < (double) right;
-            case TokenType.LESS_EQUAL:
+            }
+            case TokenType.LESS_EQUAL -> {
                 checkNumberOperands(expr.operator, left, right);
                 return (double) left <= (double) right;
-            case TokenType.BANG_EQUAL:
+            }
+            case TokenType.BANG_EQUAL -> {
                 return !isEqual(left, right);
-            case TokenType.EQUAL_EQUAL:
+            }
+            case TokenType.EQUAL_EQUAL -> {
                 return isEqual(left, right);
-            case TokenType.MINUS:
+            }
+            case TokenType.MINUS -> {
                 checkNumberOperands(expr.operator, left, right);
                 return (double) left - (double) right;
-            case TokenType.PLUS:
+            }
+            case TokenType.PLUS -> {
                 if (left instanceof Double && right instanceof Double) {
                     return (double) left + (double) right;
                 }
@@ -68,12 +75,15 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
                     return l + r;
                 }
                 throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
-            case TokenType.SLASH:
+            }
+            case TokenType.SLASH -> {
                 checkNumberOperands(expr.operator, left, right);
                 return (double) left / (double) right;
-            case TokenType.STAR:
+            }
+            case TokenType.STAR -> {
                 checkNumberOperands(expr.operator, left, right);
                 return (double) left * (double) right;
+            }
         }
 
         // Unreachable.
@@ -91,7 +101,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
         if (arguments.size() != function.arity()) {
             final String plural = function.arity() == 1 ? "" : "s";
-            final String msg = String.format("Expected %d argument%s but got %d.", function.arity(), plural, arguments.size());
+            final String msg = "Expected %d argument%s but got %d.".formatted(function.arity(), plural, arguments.size());
             throw new RuntimeError(expr.paren, msg);
         }
 
@@ -218,7 +228,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitFunctionStmt(Stmt.Function stmt) {
-        environment.define(stmt.name.lexeme(), new LoxFunction(stmt));
+        environment.define(stmt.name.lexeme(), new LoxFunction(stmt, environment));
         return null;
     }
 
@@ -241,8 +251,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitReturnStmt(Stmt.Return stmt) {
-        Object value = null;
-        if (stmt.value != null) value = evaluate(stmt.value);
+        final Object value = (stmt.value != null) ? evaluate(stmt.value) : null;
         throw new Return(value);
     }
 

@@ -28,7 +28,7 @@ public class Environment {
             return enclosing.get(name);
         }
 
-        throw new RuntimeError(name, String.format("Undefined variable '%s'.", name.lexeme()));
+        throw new RuntimeError(name, "Undefined variable '%s'.".formatted(name.lexeme()));
     }
 
     public void assign(Token name, Object value) {
@@ -42,6 +42,6 @@ public class Environment {
             return;
         }
 
-        throw new RuntimeError(name, String.format("Undefined variable '%s'.", name.lexeme()));
+        throw new RuntimeError(name, "Undefined variable '%s'.".formatted(name.lexeme()));
     }
 }
