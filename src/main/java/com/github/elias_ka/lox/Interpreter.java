@@ -240,6 +240,13 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
+    public Void visitReturnStmt(Stmt.Return stmt) {
+        Object value = null;
+        if (stmt.value != null) value = evaluate(stmt.value);
+        throw new Return(value);
+    }
+
+    @Override
     public Void visitVarStmt(Stmt.Var stmt) {
         final Object value = (stmt.initializer != null) ? evaluate(stmt.initializer) : null;
         environment.define(stmt.name.lexeme(), value);
@@ -248,7 +255,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitWhileStmt(Stmt.While stmt) {
-        while (isTruthy(stmt.condition)) {
+        while (isTruthy(evaluate(stmt.condition))) {
             execute(stmt.body);
         }
         return null;
