@@ -19,6 +19,7 @@ public class GenerateAst {
             defineAst(outputDir, "Expr", List.of(
                     "Assign   : Token name, Expr value",
                     "Binary   : Expr left, Token operator, Expr right",
+                    "Call     : Expr callee, Token paren, List<Expr> arguments",
                     "Grouping : Expr expression",
                     "Literal  : Object value",
                     "Logical  : Expr left, Token operator, Expr right",
@@ -29,6 +30,7 @@ public class GenerateAst {
             defineAst(outputDir, "Stmt", List.of(
                     "Block      : List<Stmt> statements",
                     "Expression : Expr expression",
+                    "Function   : Token name, List<Token> params, List<Stmt> body",
                     "If         : Expr condition, Stmt thenBranch, Stmt elseBranch",
                     "Print      : Expr expression",
                     "Var        : Token name, Expr initializer",
@@ -44,7 +46,7 @@ public class GenerateAst {
         final Path path = Paths.get(outputDir, baseName + ".java");
 
         try (PrintWriter writer = new PrintWriter(path.toFile(), StandardCharsets.UTF_8)) {
-            writer.println("package com.github.elias_ka;");
+            writer.println("package com.github.elias_ka.lox;");
             writer.println();
             writer.println("import java.util.List;");
             writer.println();
