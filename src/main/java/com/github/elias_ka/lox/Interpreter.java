@@ -1,9 +1,12 @@
 package com.github.elias_ka.lox;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     final Environment globals = new Environment();
+    private final Map<Expr, Integer> locals = new HashMap<>();
     private Environment environment = globals;
 
     public Interpreter() {
@@ -151,12 +154,21 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     @Override
     public Object visitVariableExpr(Expr.Variable expr) {
-        return environment.get(expr.name);
+        return lookUpVariable(expr.name, expr);
+    }
+
+    private Object lookUpVariable(Token name, Expr expr) {
+        final Integer distance = locals.get(expr);
+        if (distance != null) {
+            return environment.getAt(distance, name.lexeme());
+        }
+        return globals.get(name);
     }
 
     private void checkNumberOperands(Token operator, Object... operands) {
         for (final Object operand : operands) {
-            if (operand instanceof Double) continue;
+            if (operand instanceof Double)
+                continue;
 
             final String msg = operands.length == 1
                     ? "Operand must be a number."
@@ -167,20 +179,25 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     private boolean isTruthy(Object object) {
-        if (object == null) return false;
-        if (object instanceof Boolean) return (boolean) object;
+        if (object == null)
+            return false;
+        if (object instanceof Boolean)
+            return (boolean) object;
         return true;
     }
 
     private boolean isEqual(Object a, Object b) {
-        if (a == null && b == null) return true;
-        if (a == null) return false;
+        if (a == null && b == null)
+            return true;
+        if (a == null)
+            return false;
 
         return a.equals(b);
     }
 
     private String stringify(Object object) {
-        if (object == null) return "nil";
+        if (object == null)
+            return "nil";
 
         if (object instanceof Double) {
             String text = object.toString();
@@ -199,6 +216,10 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
     private void execute(Stmt stmt) {
         stmt.accept(this);
+    }
+
+    void resolve(Expr expr, int depth) {
+        locals.put(expr, depth);
     }
 
     void executeBlock(List<Stmt> statements, Environment environment) {
@@ -273,8 +294,12 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Object visitAssignExpr(Expr.Assign expr) {
         final Object value = evaluate(expr.value);
-        environment.assign(expr.name, value);
+        final Integer distance = locals.get(expr);
+        if (distance != null) {
+            environment.assignAt(distance, expr.name, value);
+        } else {
+            globals.assign(expr.name, value);
+        }
         return value;
     }
-
 }
