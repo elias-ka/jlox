@@ -1,12 +1,10 @@
 package com.github.elias_ka.lox;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Interpreter interpreter;
-    private final Stack<Map<String, Boolean>> scopes = new Stack<>();
+    private final Deque<Map<String, Boolean>> scopes = new ArrayDeque<>();
     private FunctionType currentFunction = FunctionType.NONE;
 
     public Resolver(Interpreter interpreter) {
@@ -153,7 +151,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     private void beginScope() {
-        scopes.push(Map.of());
+        scopes.push(new HashMap<>());
     }
 
     private void endScope() {
@@ -175,11 +173,13 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     private void resolveLocal(Expr expr, Token name) {
-        for (int i = scopes.size() - 1; i >= 0; i--) {
-            if (scopes.get(i).containsKey(name.lexeme())) {
-                interpreter.resolve(expr, scopes.size() - 1 - i);
+        int depth = 0;
+        for (final Map<String, Boolean> scope : scopes) {
+            if (scope.containsKey(name.lexeme())) {
+                interpreter.resolve(expr, depth);
                 return;
             }
+            depth++;
         }
     }
 
