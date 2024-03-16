@@ -29,6 +29,7 @@ public class Parser {
 
     private Stmt declaration() {
         try {
+            if (match(TokenType.CLASS)) return classDeclaration();
             if (match(TokenType.FUN)) return function("function");
             if (match(TokenType.VAR)) return varDeclaration();
             return statement();
@@ -36,6 +37,19 @@ public class Parser {
             synchronize();
             return null;
         }
+    }
+
+    private Stmt classDeclaration() {
+        final Token name = consume(TokenType.IDENTIFIER, "Expect class name.");
+        consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
+
+        final List<Stmt.Function> methods = new ArrayList<>();
+        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+            methods.add(function("method"));
+        }
+
+        consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
+        return new Stmt.Class(name, methods);
     }
 
     private Stmt statement() {
@@ -175,8 +189,10 @@ public class Parser {
             final Token equals = previous();
             final Expr value = assignment();
 
-            if (expr instanceof Expr.Variable e) {
-                return new Expr.Assign(e.name, value);
+            if (expr instanceof Expr.Variable v) {
+                return new Expr.Assign(v.name, value);
+            } else if (expr instanceof Expr.Get get) {
+                return new Expr.Set(get.object, get.name, value);
             }
 
             // We report an error if the left-hand side isn’t a valid assignment target, but we don’t throw it
@@ -291,6 +307,9 @@ public class Parser {
         while (true) {
             if (match(TokenType.LEFT_PAREN)) {
                 expr = finishCall(expr);
+            } else if (match(TokenType.DOT)) {
+                final Token name = consume(TokenType.IDENTIFIER, "Expect property name after '.'.");
+                expr = new Expr.Get(expr, name);
             } else {
                 break;
             }
@@ -306,6 +325,10 @@ public class Parser {
 
         if (match(TokenType.NUMBER, TokenType.STRING)) {
             return new Expr.Literal(previous().literal());
+        }
+
+        if (match(TokenType.THIS)) {
+            return new Expr.This(previous());
         }
 
         if (match(TokenType.IDENTIFIER)) {
