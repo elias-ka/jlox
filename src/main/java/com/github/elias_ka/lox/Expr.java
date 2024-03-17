@@ -20,6 +20,8 @@ public abstract class Expr {
 
         R visitSetExpr(Set expr);
 
+        R visitSuperExpr(Super expr);
+
         R visitThisExpr(This expr);
 
         R visitUnaryExpr(Unary expr);
@@ -149,6 +151,21 @@ public abstract class Expr {
         @Override
         <R> R accept(Visitor<R> visitor) {
             return visitor.visitSetExpr(this);
+        }
+    }
+
+    public static class Super extends Expr {
+        public final Token keyword;
+        public final Token method;
+
+        Super(Token keyword, Token method) {
+            this.keyword = keyword;
+            this.method = method;
+        }
+
+        @Override
+        <R> R accept(Visitor<R> visitor) {
+            return visitor.visitSuperExpr(this);
         }
     }
 

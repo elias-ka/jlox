@@ -39,10 +39,12 @@ public abstract class Stmt {
 
     public static class Class extends Stmt {
         public final Token name;
+        public final Expr.Variable superclass;
         public final List<Stmt.Function> methods;
 
-        Class(Token name, List<Stmt.Function> methods) {
+        Class(Token name, Expr.Variable superclass, List<Stmt.Function> methods) {
             this.name = name;
+            this.superclass = superclass;
             this.methods = methods;
         }
 
