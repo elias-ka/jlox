@@ -4,7 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Environment {
-    final Environment enclosing;
+
+    private final Environment enclosing;
     private final Map<String, Object> values = new HashMap<>();
 
     public Environment() {
@@ -13,6 +14,10 @@ public class Environment {
 
     public Environment(Environment enclosing) {
         this.enclosing = enclosing;
+    }
+
+    public Environment getEnclosing() {
+        return enclosing;
     }
 
     public void define(String name, Object value) {

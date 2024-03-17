@@ -1,7 +1,7 @@
 package com.github.elias_ka.lox;
 
 public class RuntimeError extends RuntimeException {
-    private final Token token;
+    private final transient Token token;
 
     public RuntimeError(Token token, String message) {
         super(message);

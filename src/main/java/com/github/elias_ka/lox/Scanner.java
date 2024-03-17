@@ -33,6 +33,20 @@ public class Scanner {
         this.source = source;
     }
 
+    private static boolean isAlpha(char c) {
+        return (c >= 'a' && c <= 'z') ||
+                (c >= 'A' && c <= 'Z') ||
+                c == '_';
+    }
+
+    private static boolean isAlphanumeric(char c) {
+        return isAlpha(c) || isDigit(c);
+    }
+
+    private static boolean isDigit(char c) {
+        return c >= '0' && c <= '9';
+    }
+
     public List<Token> scanTokens() {
         while (!isAtEnd()) {
             // We are at the beginning of the next lexeme.
@@ -159,20 +173,6 @@ public class Scanner {
         return source.charAt(current + 1);
     }
 
-    private static boolean isAlpha(char c) {
-        return (c >= 'a' && c <= 'z') ||
-                (c >= 'A' && c <= 'Z') ||
-                c == '_';
-    }
-
-    private static boolean isAlphanumeric(char c) {
-        return isAlpha(c) || isDigit(c);
-    }
-
-    private static boolean isDigit(char c) {
-        return c >= '0' && c <= '9';
-    }
-
     private boolean isAtEnd() {
         return current >= source.length();
     }
@@ -186,7 +186,7 @@ public class Scanner {
     }
 
     private void addToken(TokenType type, Object literal) {
-        String text = source.substring(start, current);
+        final String text = source.substring(start, current);
         tokens.add(new Token(type, text, literal, line));
     }
 }

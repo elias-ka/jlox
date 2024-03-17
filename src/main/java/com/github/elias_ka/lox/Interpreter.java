@@ -5,17 +5,12 @@ import java.util.List;
 import java.util.Map;
 
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
-    final Environment globals = new Environment();
+    private final Environment globals = new Environment();
     private final Map<Expr, Integer> locals = new HashMap<>();
     private Environment environment = globals;
 
     public Interpreter() {
         globals.define("clock", new LoxCallable() {
-            @Override
-            public int arity() {
-                return 0;
-            }
-
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments) {
                 return System.currentTimeMillis() / 1000.0;
@@ -311,7 +306,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         final LoxClass klass = new LoxClass(stmt.name.lexeme(), (LoxClass) superclass, methods);
 
         if (superclass != null) {
-            environment = environment.enclosing;
+            environment = environment.getEnclosing();
         }
 
         environment.assign(stmt.name, klass);
